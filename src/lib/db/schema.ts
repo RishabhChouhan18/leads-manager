@@ -9,24 +9,38 @@ export const users = sqliteTable('users', {
   updatedAt: integer('updated_at', { mode: 'timestamp' }).default(sql`(unixepoch())`),
 });
 
-export const leads = sqliteTable('leads', {
+export const buyers = sqliteTable('buyers', {
   id: text('id').primaryKey(),
-  firstName: text('first_name').notNull(),
-  lastName: text('last_name').notNull(),
-  email: text('email').notNull(),
-  phone: text('phone'),
-  company: text('company'),
-  jobTitle: text('job_title'),
-  source: text('source'), // e.g., 'website', 'referral', 'cold-call'
-  status: text('status').default('new'), // 'new', 'contacted', 'qualified', 'converted', 'lost'
-  budget: real('budget'),
+  fullName: text('full_name').notNull(),
+  email: text('email'),
+  phone: text('phone').notNull(),
+  city: text('city').notNull(), // 'Chandigarh|Mohali|Zirakpur|Panchkula|Other'
+  propertyType: text('property_type').notNull(), // 'Apartment|Villa|Plot|Office|Retail'
+  bhk: text('bhk'), // '1|2|3|4|Studio'
+  purpose: text('purpose').notNull(), // 'Buy|Rent'
+  budgetMin: integer('budget_min'),
+  budgetMax: integer('budget_max'),
+  timeline: text('timeline').notNull(), // '0-3m|3-6m|>6m|Exploring'
+  source: text('source').notNull(), // 'Website|Referral|Walk-in|Call|Other'
+  status: text('status').notNull().default('New'), // 'New|Qualified|Contacted|Visited|Negotiation|Converted|Dropped'
   notes: text('notes'),
-  createdBy: text('created_by').references(() => users.id),
+  tags: text('tags'), // JSON string array
+  ownerId: text('owner_id').references(() => users.id).notNull(),
   createdAt: integer('created_at', { mode: 'timestamp' }).default(sql`(unixepoch())`),
   updatedAt: integer('updated_at', { mode: 'timestamp' }).default(sql`(unixepoch())`),
 });
 
+export const buyerHistory = sqliteTable('buyer_history', {
+  id: text('id').primaryKey(),
+  buyerId: text('buyer_id').references(() => buyers.id).notNull(),
+  changedBy: text('changed_by').references(() => users.id).notNull(),
+  changedAt: integer('changed_at', { mode: 'timestamp' }).default(sql`(unixepoch())`),
+  diff: text('diff').notNull(), // JSON string of changed fields
+});
+
 export type User = typeof users.$inferSelect;
 export type NewUser = typeof users.$inferInsert;
-export type Lead = typeof leads.$inferSelect;
-export type NewLead = typeof leads.$inferInsert;
+export type Buyer = typeof buyers.$inferSelect;
+export type NewBuyer = typeof buyers.$inferInsert;
+export type BuyerHistory = typeof buyerHistory.$inferSelect;
+export type NewBuyerHistory = typeof buyerHistory.$inferInsert;
