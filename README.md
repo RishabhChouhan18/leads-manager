@@ -1,3 +1,9 @@
+A simple MERN + Next.js application to capture, list, and manage buyer leads with validation, search/filter, and CSV export functionality.  
+This project was built as part of an internship assignment.
+
+
+
+
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
 ## Getting Started
