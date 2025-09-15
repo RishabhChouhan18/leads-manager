@@ -17,6 +17,6 @@ export default defineConfig({
   out: './migrations',
   dialect: 'sqlite',
   dbCredentials: {
-    url: './sqlite.db',
+    url: './abc.sqlite',
   },
 });

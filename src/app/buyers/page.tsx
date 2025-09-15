@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -6,7 +7,7 @@ import { Search, Plus, Filter, Eye, Edit2, MapPin, Phone, Mail, Calendar, Buildi
 
 // Types
 interface Buyer {
-  id: string;
+  id: number;
   fullName: string;
   email?: string;
   phone: string;
@@ -21,48 +22,9 @@ interface Buyer {
   status: string;
   notes?: string;
   tags: string[];
+  createdAt: string;
   updatedAt: string;
 }
-
-// Mock data for now
-const mockBuyers: Buyer[] = [
-  {
-    id: '1',
-    fullName: 'Rahul Sharma',
-    email: 'rahul@example.com',
-    phone: '9876543210',
-    city: 'Chandigarh',
-    propertyType: 'Apartment',
-    bhk: '3',
-    purpose: 'Buy',
-    budgetMin: 5000000,
-    budgetMax: 7000000,
-    timeline: '0-3m',
-    source: 'Website',
-    status: 'Qualified',
-    notes: 'Looking for 3BHK in Sector 34',
-    tags: ['premium', 'urgent'],
-    updatedAt: new Date().toISOString(),
-  },
-  {
-    id: '2',
-    fullName: 'Priya Singh',
-    email: 'priya@example.com',
-    phone: '9876543211',
-    city: 'Mohali',
-    propertyType: 'Villa',
-    bhk: '4',
-    purpose: 'Buy',
-    budgetMin: 12000000,
-    budgetMax: 15000000,
-    timeline: '3-6m',
-    source: 'Referral',
-    status: 'Contacted',
-    notes: 'Prefers independent villa with parking',
-    tags: ['luxury'],
-    updatedAt: new Date().toISOString(),
-  }
-];
 
 // Utility functions
 const formatCurrency = (amount: number): string => {
@@ -107,7 +69,7 @@ const getStatusIcon = (status: string) => {
 };
 
 export default function BuyersPage() {
-  const [buyers, setBuyers] = useState<Buyer[]>(mockBuyers);
+  const [buyers, setBuyers] = useState<Buyer[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [filters, setFilters] = useState({
     city: '',
@@ -120,6 +82,33 @@ export default function BuyersPage() {
   const propertyTypes = ['Apartment', 'Villa', 'Plot', 'Office', 'Retail'];
   const statuses = ['New', 'Qualified', 'Contacted', 'Visited', 'Negotiation', 'Converted', 'Dropped'];
   const timelines = ['0-3m', '3-6m', '>6m', 'Exploring'];
+
+  // Fetch data from API
+  useEffect(() => {
+    async function fetchBuyers() {
+      try {
+        const response = await fetch('/api/buyers');
+        const data = await response.json();
+        console.log('API Response:', data);
+        
+        // The API returns data in data.data, not data.buyers
+        const buyersArray = data.data || data.buyers || [];
+        
+        // Add default status and format data
+        const buyersWithStatus = buyersArray.map((buyer: any) => ({
+          ...buyer,
+          id: buyer.id.toString(),
+          status: 'New', // Default status
+          updatedAt: buyer.createdAt
+        }));
+        
+        setBuyers(buyersWithStatus);
+      } catch (error) {
+        console.error('Error fetching buyers:', error);
+      }
+    }
+    fetchBuyers();
+  }, []);
 
   const filteredBuyers = buyers.filter(buyer => {
     const matchesSearch = !searchTerm || 

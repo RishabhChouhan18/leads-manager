@@ -1,11 +1,11 @@
-
+// // File: src/app/buyers/[id]/edit/page.tsx
 
 // 'use client';
 
-// import { useState } from 'react';
-// import { useRouter } from 'next/navigation';
+// import { useState, useEffect } from 'react';
+// import { useRouter, useParams } from 'next/navigation';
 // import Link from 'next/link';
-// import { ArrowLeft, CheckCircle, Tag } from 'lucide-react';
+// import { ArrowLeft, CheckCircle, Tag, Loader } from 'lucide-react';
 
 // interface BuyerFormData {
 //   fullName: string;
@@ -23,8 +23,11 @@
 //   tags: string[];
 // }
 
-// export default function NewBuyerPage() {
+// export default function BuyerEditPage() {
 //   const router = useRouter();
+//   const params = useParams();
+//   const buyerId = params?.id as string;
+
 //   const [formData, setFormData] = useState<BuyerFormData>({
 //     fullName: '',
 //     email: '',
@@ -44,6 +47,7 @@
 //   const [errors, setErrors] = useState<{ [key: string]: string }>({});
 //   const [newTag, setNewTag] = useState('');
 //   const [isSubmitting, setIsSubmitting] = useState(false);
+//   const [isLoading, setIsLoading] = useState(false);
 
 //   const cities = ['Chandigarh', 'Mohali', 'Zirakpur', 'Panchkula', 'Other'];
 //   const propertyTypes = ['Apartment', 'Villa', 'Plot', 'Office', 'Retail'];
@@ -53,6 +57,50 @@
 //   const sources = ['Website', 'Referral', 'Walk-in', 'Call', 'Other'];
 
 //   const requiresBhk = ['Apartment', 'Villa'].includes(formData.propertyType);
+
+//   // Fetch buyer data on component mount
+//   useEffect(() => {
+//     if (buyerId) {
+//       fetchBuyerData();
+//     }
+//   }, [buyerId]);
+
+//   const fetchBuyerData = async () => {
+//     try {
+//       setIsLoading(true);
+//       const response = await fetch(`/api/buyers/${buyerId}`);
+      
+//       if (!response.ok) {
+//         throw new Error('Failed to fetch buyer data');
+//       }
+
+//       const data = await response.json();
+//       const buyer = data.buyer;
+
+//       // Convert buyer data to form format
+//       setFormData({
+//         fullName: buyer.fullName || '',
+//         email: buyer.email || '',
+//         phone: buyer.phone || '',
+//         city: buyer.city || 'Chandigarh',
+//         propertyType: buyer.propertyType || 'Apartment',
+//         bhk: buyer.bhk || '2',
+//         purpose: buyer.purpose || 'Buy',
+//         budgetMin: buyer.budgetMin ? buyer.budgetMin.toString() : '',
+//         budgetMax: buyer.budgetMax ? buyer.budgetMax.toString() : '',
+//         timeline: buyer.timeline || '0-3m',
+//         source: buyer.source || 'Website',
+//         notes: buyer.notes || '',
+//         tags: buyer.tags || [],
+//       });
+//     } catch (error) {
+//       console.error('Error fetching buyer:', error);
+//       alert('Failed to load buyer data');
+//       router.push('/buyers');
+//     } finally {
+//       setIsLoading(false);
+//     }
+//   };
 
 //   const handleSubmit = async (e: React.FormEvent) => {
 //     e.preventDefault();
@@ -74,10 +122,10 @@
 
 //     if (Object.keys(newErrors).length === 0) {
 //       try {
-//         // Prepare data for API call - convert budget strings to integers
+//         // Prepare data for API call
 //         const apiData = {
 //           fullName: formData.fullName,
-//           email: formData.email || undefined, // Send undefined instead of empty string
+//           email: formData.email || undefined,
 //           phone: formData.phone,
 //           city: formData.city,
 //           propertyType: formData.propertyType,
@@ -91,9 +139,9 @@
 //           tags: formData.tags,
 //         };
 
-//         // Make API call to create buyer
-//         const response = await fetch('/api/buyers', {
-//           method: 'POST',
+//         // Make API call to update buyer
+//         const response = await fetch(`/api/buyers/${buyerId}`, {
+//           method: 'PUT',
 //           headers: {
 //             'Content-Type': 'application/json',
 //           },
@@ -101,19 +149,18 @@
 //         });
 
 //         const data = await response.json();
-//         console.log("data=========>",data)
 
 //         if (!response.ok) {
-//           throw new Error(data.error || 'Failed to create buyer');
+//           throw new Error(data.error || 'Failed to update buyer');
 //         }
 
-//         // Success - show success message and redirect
-//         alert('Buyer created successfully!');
+//         // Success
+//         alert('Buyer updated successfully!');
 //         router.push('/buyers');
         
 //       } catch (error) {
-//         console.error('Error creating buyer:', error);
-//         alert(error instanceof Error ? error.message : 'Failed to create buyer');
+//         console.error('Error updating buyer:', error);
+//         alert(error instanceof Error ? error.message : 'Failed to update buyer');
 //       }
 //     }
     
@@ -134,6 +181,18 @@
 //     }));
 //   };
 
+//   // Loading state
+//   if (isLoading) {
+//     return (
+//       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+//         <div className="text-center">
+//           <Loader className="w-8 h-8 animate-spin text-blue-600 mx-auto mb-4" />
+//           <p className="text-gray-600">Loading buyer data...</p>
+//         </div>
+//       </div>
+//     );
+//   }
+
 //   return (
 //     <div className="min-h-screen bg-gray-50 p-4">
 //       <div className="max-w-4xl mx-auto">
@@ -146,8 +205,12 @@
 //             <ArrowLeft className="w-4 h-4 mr-2" />
 //             Back to Buyers
 //           </Link>
-//           <h1 className="text-2xl font-bold text-gray-900">Add New Buyer</h1>
-//           <p className="text-gray-600">Fill in the buyer details below</p>
+//           <h1 className="text-2xl font-bold text-gray-900">
+//             Edit Buyer
+//           </h1>
+//           <p className="text-gray-600">
+//             Update the buyer details below
+//           </p>
 //         </div>
 
 //         {/* Form */}
@@ -427,12 +490,12 @@
 //                 {isSubmitting ? (
 //                   <>
 //                     <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
-//                     Creating...
+//                     Updating...
 //                   </>
 //                 ) : (
 //                   <>
 //                     <CheckCircle className="w-4 h-4" />
-//                     Create Buyer
+//                     Update Buyer
 //                   </>
 //                 )}
 //               </button>
@@ -443,6 +506,9 @@
 //     </div>
 //   );
 // }
+
+// File: src/app/buyers/[id]/edit/page.tsx
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -466,10 +532,9 @@ interface BuyerFormData {
   tags: string[];
 }
 
-export default function BuyerFormPage() {
+export default function BuyerEditPage() {
   const router = useRouter();
   const params = useParams();
-  const isEditing = Boolean(params?.id);
   const buyerId = params?.id as string;
 
   const [formData, setFormData] = useState<BuyerFormData>({
@@ -502,45 +567,83 @@ export default function BuyerFormPage() {
 
   const requiresBhk = ['Apartment', 'Villa'].includes(formData.propertyType);
 
-  // Fetch buyer data if editing
+  // Fetch buyer data on component mount
   useEffect(() => {
-    if (isEditing && buyerId) {
+    if (buyerId) {
       fetchBuyerData();
     }
-  }, [isEditing, buyerId]);
+  }, [buyerId]);
 
   const fetchBuyerData = async () => {
     try {
       setIsLoading(true);
+      console.log('Fetching buyer with ID:', buyerId);
+      
       const response = await fetch(`/api/buyers/${buyerId}`);
+      console.log('Response status:', response.status);
+      console.log('Response headers:', response.headers);
+      
+      // Get the response text first to see what we're actually receiving
+      const responseText = await response.text();
+      console.log('Raw response text:', responseText);
       
       if (!response.ok) {
-        throw new Error('Failed to fetch buyer data');
+        throw new Error(`API returned ${response.status}: ${responseText}`);
       }
 
-      const data = await response.json();
-      const buyer = data.buyer;
+      // Try to parse as JSON
+      let data;
+      try {
+        data = JSON.parse(responseText);
+      } catch (parseError) {
+        throw new Error(`Failed to parse JSON response: ${responseText}`);
+      }
+      
+      console.log('Parsed JSON data:', data);
+      console.log('Data keys:', Object.keys(data));
+      
+      // Handle different response formats
+      let buyer;
+      if (data.buyer) {
+        buyer = data.buyer;
+        console.log('Found buyer in data.buyer');
+      } else if (data.data) {
+        buyer = data.data;
+        console.log('Found buyer in data.data');
+      } else {
+        buyer = data;
+        console.log('Using data directly as buyer');
+      }
+      
+      console.log('Final buyer object:', buyer);
+      console.log('Buyer keys:', buyer ? Object.keys(buyer) : 'buyer is null/undefined');
 
-      // Convert buyer data to form format
+      if (!buyer) {
+        throw new Error('No buyer data found in any expected location');
+      }
+
+      // Set form data with extensive fallbacks
       setFormData({
-        fullName: buyer.fullName || '',
+        fullName: buyer.fullName || buyer.full_name || buyer.name || '',
         email: buyer.email || '',
         phone: buyer.phone || '',
         city: buyer.city || 'Chandigarh',
-        propertyType: buyer.propertyType || 'Apartment',
+        propertyType: buyer.propertyType || buyer.property_type || 'Apartment',
         bhk: buyer.bhk || '2',
         purpose: buyer.purpose || 'Buy',
-        budgetMin: buyer.budgetMin ? buyer.budgetMin.toString() : '',
-        budgetMax: buyer.budgetMax ? buyer.budgetMax.toString() : '',
+        budgetMin: buyer.budgetMin || buyer.budget_min ? String(buyer.budgetMin || buyer.budget_min) : '',
+        budgetMax: buyer.budgetMax || buyer.budget_max ? String(buyer.budgetMax || buyer.budget_max) : '',
         timeline: buyer.timeline || '0-3m',
         source: buyer.source || 'Website',
         notes: buyer.notes || '',
-        tags: buyer.tags || [],
+        tags: buyer.tags ? (typeof buyer.tags === 'string' ? JSON.parse(buyer.tags) : buyer.tags) : [],
       });
+      
     } catch (error) {
-      console.error('Error fetching buyer:', error);
-      alert('Failed to load buyer data');
-      router.push('/buyers');
+      console.error('Complete error details:', error);
+      alert(`Error: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      // Don't redirect immediately in debug mode - comment this out to stay on page for debugging
+      // router.push('/buyers');
     } finally {
       setIsLoading(false);
     }
@@ -583,12 +686,9 @@ export default function BuyerFormPage() {
           tags: formData.tags,
         };
 
-        // Make API call
-        const url = isEditing ? `/api/buyers/${buyerId}` : '/api/buyers';
-        const method = isEditing ? 'PUT' : 'POST';
-
-        const response = await fetch(url, {
-          method,
+        // Make API call to update buyer
+        const response = await fetch(`/api/buyers/${buyerId}`, {
+          method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
           },
@@ -598,16 +698,16 @@ export default function BuyerFormPage() {
         const data = await response.json();
 
         if (!response.ok) {
-          throw new Error(data.error || `Failed to ${isEditing ? 'update' : 'create'} buyer`);
+          throw new Error(data.error || 'Failed to update buyer');
         }
 
         // Success
-        alert(`Buyer ${isEditing ? 'updated' : 'created'} successfully!`);
+        alert('Buyer updated successfully!');
         router.push('/buyers');
         
       } catch (error) {
-        console.error(`Error ${isEditing ? 'updating' : 'creating'} buyer:`, error);
-        alert(error instanceof Error ? error.message : `Failed to ${isEditing ? 'update' : 'create'} buyer`);
+        console.error('Error updating buyer:', error);
+        alert(error instanceof Error ? error.message : 'Failed to update buyer');
       }
     }
     
@@ -628,7 +728,7 @@ export default function BuyerFormPage() {
     }));
   };
 
-  // Loading state for edit mode
+  // Loading state
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -653,10 +753,10 @@ export default function BuyerFormPage() {
             Back to Buyers
           </Link>
           <h1 className="text-2xl font-bold text-gray-900">
-            {isEditing ? 'Edit Buyer' : 'Add New Buyer'}
+            Edit Buyer
           </h1>
           <p className="text-gray-600">
-            {isEditing ? 'Update the buyer details below' : 'Fill in the buyer details below'}
+            Update the buyer details below
           </p>
         </div>
 
@@ -937,12 +1037,12 @@ export default function BuyerFormPage() {
                 {isSubmitting ? (
                   <>
                     <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
-                    {isEditing ? 'Updating...' : 'Creating...'}
+                    Updating...
                   </>
                 ) : (
                   <>
                     <CheckCircle className="w-4 h-4" />
-                    {isEditing ? 'Update Buyer' : 'Create Buyer'}
+                    Update Buyer
                   </>
                 )}
               </button>
